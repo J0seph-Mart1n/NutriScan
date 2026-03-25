@@ -1,3 +1,5 @@
+import { colors } from '@/constants/Colors';
+
 export const recentScans =[
   {
     id: '1',

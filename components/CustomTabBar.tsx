@@ -7,11 +7,6 @@ import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 export default function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   return (
     <View style={styles.tabBar}>
-      <BlurView
-        tint="light"
-        intensity={80}
-        style={styles.blurBackground}
-      />
       <View style={styles.tabContent}>
         {state.routes.map((route, index) => {
           const { options } = descriptors[route.key];
@@ -88,7 +83,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     elevation: 0,
-    backgroundColor: 'transparent',
+    backgroundColor: '#baf5d6ff',
     borderTopWidth: 0,
     height: Platform.OS === 'ios' ? 90 : 80,
     shadowColor: '#000',
