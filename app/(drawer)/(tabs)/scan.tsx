@@ -8,6 +8,8 @@ import {
   Platform,
   Alert,
   Dimensions,
+  Modal,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CameraView, useCameraPermissions } from 'expo-camera';
@@ -34,6 +36,7 @@ const ScanScreen = () => {
     const[gridVisible, setGridVisible] = useState(false);
     const cameraRef = useRef<any>(null);
     const isFocused = useIsFocused(); // Ensures camera stops when switching tabs
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
 
     // Animation for the scanning line
     const scanAnim = useRef(new Animated.Value(0)).current;
@@ -61,45 +64,54 @@ const ScanScreen = () => {
 
     // Handle taking a photo
     const takePhoto = async () => {
-        if (cameraRef.current) {
+        if (cameraRef.current && !isAnalyzing) {
         try {
+            setIsAnalyzing(true);
             const photo = await cameraRef.current.takePictureAsync({
             quality: 0.8,
             });
             
-            const formData = new FormData();
-            // @ts-ignore
-            formData.append('image', {
-                uri: photo.uri,
-                type: 'image/jpeg',
-                name: 'nutrition.jpg',
-            });
-
             try {
-                // const apiUrl = process.env.EXPO_PUBLIC_API_URL;
-                // const response = await fetch(`${apiUrl}/analyze-label`, {
-                //     method: 'POST',
-                //     body: formData,
-                //     headers: { 'Content-Type': 'multipart/form-data' },
-                // });
+                const formData = new FormData();
+                // @ts-ignore
+                formData.append('image', {
+                    uri: photo.uri,
+                    type: 'image/jpeg',
+                    name: 'nutrition.jpg',
+                });
+        
+                const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+                const response = await fetch(`${apiUrl}/analyze-label`, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                });
                 
-                // const data = await response.json();
-                // console.log("Analysis Results:", data);
+                const data = await response.json();
+                console.log("Analysis Results:", data);
                 
-                // Transfer to the report page, passing the photo URI and backend data as parameters.
+                if (data.error) {
+                  Alert.alert("Analysis Failed", data.error, [{ text: "OK" }]);
+                  setIsAnalyzing(false);
+                  return;
+                }
+
+                // Transfer to the report page, passing the parsed backend data safely.
                 router.push({
                     pathname: '/report',
                     params: { 
-                        imageUri: photo.uri,
-                        // analysisData: JSON.stringify(data)
+                        analysisData: JSON.stringify(data),
                     }
                 });
             } catch (error) {
-                console.error('Analysis failed:', error);
-                Alert.alert('Analysis Failed', 'Could not fetch analysis from backend.');
-            }
+                Alert.alert("Error", "Could not analyze the image.", [{ text: "OK" }]);
+            } finally {
+                setIsAnalyzing(false);
+                console.log("Analysis complete");
+            } 
         } catch (error) {
             console.error('Failed to take photo', error);
+            setIsAnalyzing(false);
         }
         }
     };
@@ -236,6 +248,15 @@ const ScanScreen = () => {
                     </View>
                 </CameraView>
             )}
+
+            {/* Global Loading Modal */}
+            <Modal visible={isAnalyzing} transparent={true} animationType="fade">
+                <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }]}>
+                    <ActivityIndicator size={60} color={colors.primaryFixed} />
+                    <Text style={{ color: '#fff', marginTop: 24, fontSize: 18, fontWeight: '700', letterSpacing: 0.5 }}>Analyzing Label...</Text>
+                    <Text style={{ color: 'rgba(255,255,255,0.7)', marginTop: 8, fontSize: 14 }}>Extracting nutritional details</Text>
+                </View>
+            </Modal>
         </View>
     );
 };

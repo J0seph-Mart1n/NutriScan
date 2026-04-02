@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -8,9 +8,11 @@ import {
   TouchableOpacity,
   Platform,
   StatusBar,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import Svg, { Circle } from 'react-native-svg';
@@ -37,26 +39,48 @@ const colors = {
   outlineVariant: 'rgba(190, 202, 185, 0.15)',
 };
 
-// Mock Data for lists
-const benefits =[
-  { id: 1, title: 'High Vitamin K', desc: 'Supports bone health and blood clotting efficiency.' },
-  { id: 2, title: 'Antioxidant Rich', desc: 'Contains lutein and zeaxanthin for optimal eye health.' },
-  { id: 3, title: 'Zero Additives', desc: '100% natural ingredients with no synthetic fillers.' },
-];
-
-const harms =[
-  { id: 1, title: 'Natural Sugar Content', desc: 'Concentrated fruit sugars; monitor if you have glucose sensitivity.' },
-  { id: 2, title: 'Low Fiber Content', desc: 'Juicing removes pulp, resulting in faster sugar absorption.' },
-];
-
-const nutritionFacts =[
-  { id: 1, name: 'Energy', amount: '120 kcal', dv: '6%', pct: 6, color: colors.primary },
-  { id: 2, name: 'Total Sugars', amount: '18g', dv: '20%', pct: 20, color: colors.tertiary },
-  { id: 3, name: 'Vitamin K', amount: '112mcg', dv: '140%', pct: 100, color: colors.primary },
-  { id: 4, name: 'Sodium', amount: '45mg', dv: '2%', pct: 2, color: colors.primary },
-];
-
 export default function ScanReportScreen() {
+  const { analysisData } = useLocalSearchParams();
+
+  if (!analysisData) {
+    return null;
+  }
+
+  // Parse the data passed from the scanner screen
+  const parsedData = typeof analysisData === 'string' ? JSON.parse(analysisData) : analysisData;
+
+  // Map Data
+  const formatKey = (str: string) => str.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+
+  const benefitsObj = parsedData.benefits || {};
+  const mappedBenefits = Object.keys(benefitsObj).map((key, index) => ({
+    id: index,
+    title: formatKey(key),
+    desc: benefitsObj[key],
+  }));
+
+  const harmsObj = parsedData.harmful_effects || {};
+  const mappedHarms = Object.keys(harmsObj).map((key, index) => ({
+    id: index,
+    title: formatKey(key),
+    desc: harmsObj[key],
+  }));
+
+  const nutritionFactsObj = parsedData.nutritional_facts || {};
+  const mappedNutritionFacts = Object.keys(nutritionFactsObj).map((key, index) => ({
+    id: index,
+    name: formatKey(key),
+    amount: nutritionFactsObj[key] || "N/A",
+  })).filter(row => row.amount && row.amount !== "N/A" && row.amount !== "");
+
+  const scoreRaw = parsedData.health_score?.score || "0";
+  // Extract number from score if LM outputted something like "85/100"
+  const parsedScoreMatch = scoreRaw.match(/\d+/);
+  const healthScoreInt = parsedScoreMatch ? parseInt(parsedScoreMatch[0], 10) : 0;
+  
+  const scoreSentence = parsedData.health_score?.sentence || "";
+  const summaryInsight = parsedData.summary || "No insights discovered.";
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
@@ -99,18 +123,18 @@ export default function ScanReportScreen() {
               <Svg width={96} height={96} viewBox="0 0 96 96" style={{ transform: [{ rotate: '-90deg' }] }}>
                 {/* Background Track */}
                 <Circle cx={48} cy={48} r={40} stroke={colors.surfaceContainerHighest} strokeWidth={8} fill="transparent" />
-                {/* Progress Ring (85%) */}
+                {/* Progress Ring */}
                 <Circle cx={48} cy={48} r={40} stroke={colors.primary} strokeWidth={8} fill="transparent"
-                  strokeDasharray={251.2} strokeDashoffset={251.2 - (85 / 100) * 251.2} strokeLinecap="round" />
+                  strokeDasharray={251.2} strokeDashoffset={251.2 - (healthScoreInt / 100) * 251.2} strokeLinecap="round" />
               </Svg>
               <View style={styles.scoreTextOverlay}>
-                <Text style={styles.scoreNumber}>85</Text>
+                <Text style={styles.scoreNumber}>{healthScoreInt}</Text>
               </View>
             </View>
             <View style={styles.scoreTextContainer}>
               <Text style={styles.scoreTitle}>Health Score</Text>
               <Text style={styles.scoreSubtitle}>
-                Excellent choice for your daily nutritional goals. High nutrient density detected.
+                {scoreSentence}
               </Text>
             </View>
           </View>
@@ -128,7 +152,7 @@ export default function ScanReportScreen() {
             </View>
             
             <View style={styles.bentoList}>
-              {benefits.map((item) => (
+              {mappedBenefits.map((item) => (
                 <View key={item.id} style={styles.bentoListItem}>
                   <MaterialIcons name="check-circle" size={20} color={colors.primary} style={styles.listIcon} />
                   <View style={styles.listTextContainer}>
@@ -150,7 +174,7 @@ export default function ScanReportScreen() {
             </View>
             
             <View style={styles.bentoList}>
-              {harms.map((item) => (
+              {mappedHarms.map((item) => (
                 <View key={item.id} style={styles.bentoListItem}>
                   <MaterialIcons name="report-problem" size={20} color={colors.tertiary} style={styles.listIcon} />
                   <View style={styles.listTextContainer}>
@@ -172,25 +196,18 @@ export default function ScanReportScreen() {
           <View style={styles.tableHeadRow}>
             <Text style={[styles.tableHeadText, { flex: 2 }]}>NUTRIENT</Text>
             <Text style={[styles.tableHeadText, { flex: 1, textAlign: 'right' }]}>AMOUNT</Text>
-            <Text style={[styles.tableHeadText, { flex: 1.5, textAlign: 'right' }]}>% DV</Text>
           </View>
 
-          {nutritionFacts.map((row, index) => (
-            <View key={row.id} style={[styles.tableRow, index !== nutritionFacts.length - 1 && styles.tableRowBorder]}>
+          {mappedNutritionFacts.map((row, index) => (
+            <View key={row.id} style={[styles.tableRow, index !== mappedNutritionFacts.length - 1 && styles.tableRowBorder]}>
               <Text style={[styles.tableCellMain, { flex: 2 }]}>{row.name}</Text>
               <Text style={[styles.tableCellSub, { flex: 1, textAlign: 'right' }]}>{row.amount}</Text>
-              <View style={[styles.tableCellDvContainer, { flex: 1.5 }]}>
-                <Text style={[styles.tableCellDvText, { color: row.color }]}>{row.dv}</Text>
-                <View style={styles.dvBarBg}>
-                  <View style={[styles.dvBarFill, { width: `${row.pct}%`, backgroundColor: row.color }]} />
-                </View>
-              </View>
             </View>
           ))}
 
           <View style={styles.tableFooter}>
             <Text style={styles.tableFooterText}>
-              * The % Daily Value (DV) tells you how much a nutrient in a serving of food contributes to a daily diet. 2,000 calories a day is used for general nutrition advice. This product is analyzed based on laboratory-verified organic standards.
+              * Values are analyzed based on the provided nutritional label image. Accuracy depends on the clarity of the image.
             </Text>
           </View>
         </View>
@@ -200,7 +217,7 @@ export default function ScanReportScreen() {
           <View style={styles.insightGlow} />
           <Text style={styles.insightTitle}>Vitality Insight</Text>
           <Text style={styles.insightDesc}>
-            "This blend is exceptionally high in Vitamin K. For optimal absorption, consider consuming it alongside a source of healthy fats, like a handful of almonds or half an avocado."
+            "{summaryInsight}"
           </Text>
           <TouchableOpacity style={styles.insightButton}>
             <Text style={styles.insightButtonText}>Save to My Log</Text>
