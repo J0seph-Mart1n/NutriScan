@@ -113,8 +113,15 @@ const ScanScreen = () => {
                         analysisData: JSON.stringify(data),
                     }
                 });
-            } catch (error) {
-                Alert.alert("Error", "Could not analyze the image.", [{ text: "OK" }]);
+            } catch (error: any) {
+                if (error instanceof Error && error.message === "User not logged in") {
+                    Alert.alert("Authentication Required", "Please log in to your account to analyze nutrition labels.", [
+                        { text: "Log In", onPress: () => router.push('/login') },
+                        { text: "Cancel", style: 'cancel' }
+                    ]);
+                } else {
+                    Alert.alert("Error", "Could not analyze the image. Please check your connection.", [{ text: "OK" }]);
+                }
             } finally {
                 setIsAnalyzing(false);
                 console.log("Analysis complete");
