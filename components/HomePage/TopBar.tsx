@@ -26,7 +26,7 @@ export default function TopBar() {
                 style={styles.profilePic}
               />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>NutriScan</Text>
+            <Text style={styles.headerTitle}>Vitality</Text>
           </View>
           <TouchableOpacity style={styles.iconButton}>
             <MaterialIcons name="notifications-none" size={24} color="#166534" />

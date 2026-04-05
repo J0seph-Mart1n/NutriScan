@@ -73,3 +73,11 @@ export const ReportColors = {
   white: '#ffffff',
   outlineVariant: 'rgba(190, 202, 185, 0.15)',
 };
+
+export const ScanColors = {
+  primaryFixed: '#a3f69c',
+  primaryFixedDim: '#88d982',
+  primaryContainer: '#5dac5b',
+  white: '#ffffff',
+  overlay: 'rgba(0, 0, 0, 0.6)',
+};
