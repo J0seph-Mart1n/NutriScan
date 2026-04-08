@@ -1,14 +1,15 @@
 import React from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import { HistoryColors } from '@/constants/Colors';
 
 interface ScanItem {
     id: string | number;
-    image: string;
     title: string;
     date: string;
     score: number;
+    rawData?: any;
 }
 
 interface HistoryEntriesProps {
@@ -26,8 +27,20 @@ export const HistoryEntries = ({ displayedScans }: HistoryEntriesProps) => {
                 const badgeTextColor = isWarning ? HistoryColors.tertiaryContainer : HistoryColors.primary;
                 
                 return (
-                <View key={item.id} style={styles.card}>
-                    <Image source={{ uri: item.image }} style={styles.cardImage} />
+                <TouchableOpacity 
+                    key={item.id} 
+                    style={styles.card}
+                    onPress={() => {
+                        if (item.rawData) {
+                            router.push({
+                                pathname: '/report',
+                                params: { 
+                                    analysisData: JSON.stringify(item.rawData),
+                                }
+                            });
+                        }
+                    }}
+                >
                     
                     <View style={styles.cardContent}>
                         <View style={styles.cardTop}>
@@ -56,7 +69,7 @@ export const HistoryEntries = ({ displayedScans }: HistoryEntriesProps) => {
                             </TouchableOpacity>
                         </View>
                     </View>
-                </View>
+                </TouchableOpacity>
                 );
             })}
         </View>
