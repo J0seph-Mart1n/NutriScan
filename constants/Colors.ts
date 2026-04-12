@@ -82,3 +82,18 @@ export const ScanColors = {
   white: '#ffffff',
   overlay: 'rgba(0, 0, 0, 0.6)',
 };
+
+export const DailyLogColors = {
+    brandGreen: '#4CAF50',
+    brandGreenLight: 'rgba(76, 175, 80, 0.1)',
+    surface: '#ffffff',
+    surfaceContainerLow: '#f0f1ed',
+    surfaceContainerHighest: '#e1e4de',
+    onSurface: '#191c19',
+    onSurfaceVariant: '#43493f',
+    outlineVariant: '#c3c8bc',
+    tertiary: '#705d00',
+    secondary: '#52634f',
+    white: '#ffffff',
+    zinc400: '#a1a1aa',
+};
