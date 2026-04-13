@@ -29,10 +29,10 @@ export default function NutritionCard({ foodName, calories, protein, carbs }: Nu
             <View style={styles.cardHeaderRow}>
                 <View>
                     <Text style={styles.cardSupertitle}>NUTRITIONAL ESTIMATE</Text>
-                    <Text style={styles.cardTitle}>{foodName || 'Unknown Food'}</Text>
+                    <Text style={styles.cardTitle}>{foodName}</Text>
                 </View>
                 <View style={{ alignItems: 'flex-end' }}>
-                    <Text style={styles.caloriesValue}>{calories || '265'}</Text>
+                    <Text style={styles.caloriesValue}>{calories}</Text>
                     <Text style={styles.caloriesLabel}>CALORIES</Text>
                 </View>
             </View>
@@ -45,7 +45,7 @@ export default function NutritionCard({ foodName, calories, protein, carbs }: Nu
                         <MaterialIcons name="fitness-center" size={14} color={DailyLogColors.brandGreen} />
                         <Text style={[styles.macroLabel, { color: DailyLogColors.brandGreen }]}>PROTEIN</Text>
                     </View>
-                    <Text style={styles.macroValue}>{protein || '9.2'}<Text style={styles.macroUnit}>g</Text></Text>
+                    <Text style={styles.macroValue}>{protein}<Text style={styles.macroUnit}>g</Text></Text>
                     <View style={styles.progressBarBg}>
                         <View style={[styles.progressBarFill, { width: `${proteinPct}%`, backgroundColor: DailyLogColors.brandGreen }]} />
                     </View>
@@ -57,7 +57,7 @@ export default function NutritionCard({ foodName, calories, protein, carbs }: Nu
                         <MaterialIcons name="grain" size={14} color={DailyLogColors.tertiary} />
                         <Text style={[styles.macroLabel, { color: DailyLogColors.tertiary }]}>CARBS</Text>
                     </View>
-                    <Text style={styles.macroValue}>{carbs || '45.8'}<Text style={styles.macroUnit}>g</Text></Text>
+                    <Text style={styles.macroValue}>{carbs}<Text style={styles.macroUnit}>g</Text></Text>
                     <View style={styles.progressBarBg}>
                         <View style={[styles.progressBarFill, { width: `${carbsPct}%`, backgroundColor: DailyLogColors.tertiary }]} />
                     </View>

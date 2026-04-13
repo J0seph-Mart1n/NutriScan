@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { DailyLogColors } from '@/constants/Colors';
+import { opacity } from 'react-native-reanimated/lib/typescript/Colors';
 
 interface BottomActionProps {
     showEstimate: boolean;
@@ -15,19 +16,24 @@ interface BottomActionProps {
     isSaving: boolean;
     handleCalculateEstimate: () => void;
     handleSaveDailyLog: () => void;
+    foodName: string;
+    quantity: string;
+    calories: string;
+    protein: string;
+    carbs: string;
 }
 
-export default function BottomAction({ showEstimate, isEstimating, isSaving, handleCalculateEstimate, handleSaveDailyLog }: BottomActionProps) {
+export default function BottomAction({ showEstimate, isEstimating, isSaving, handleCalculateEstimate, handleSaveDailyLog, foodName, quantity, calories, protein, carbs }: BottomActionProps) {
     return (
         <>
             {showEstimate && (
                 <View style={styles.bottomActionArea}>
                     <View style={{ flexDirection: 'row', gap: 12 }}>
                         <TouchableOpacity
-                            style={[styles.submitButton, { flex: 1, backgroundColor: DailyLogColors.surfaceContainerHighest }]}
+                            style={[styles.submitButton, { flex: 1, backgroundColor: DailyLogColors.surfaceContainerHighest }, {opacity: (foodName === '' || quantity === '') ? 0.5 : 1}]}
                             activeOpacity={0.8}
                             onPress={handleCalculateEstimate}
-                            disabled={isEstimating || isSaving}
+                            disabled={isEstimating || isSaving || foodName === '' || quantity === ''}
                         >
                             {isEstimating ? (
                                 <ActivityIndicator color={DailyLogColors.secondary} size="small" />
@@ -40,10 +46,10 @@ export default function BottomAction({ showEstimate, isEstimating, isSaving, han
                         </TouchableOpacity>
 
                         <TouchableOpacity
-                            style={[styles.submitButton, { flex: 1.5 }]}
+                            style={[styles.submitButton, { flex: 1.5 }, {opacity: (foodName === '' || calories === '' || protein === '' || carbs === '') ? 0.5 : 1}]}
                             activeOpacity={0.8}
                             onPress={handleSaveDailyLog}
-                            disabled={isSaving || isEstimating}
+                            disabled={isSaving || isEstimating || foodName === '' || calories === '' || protein === '' || carbs === ''}
                         >
                             {isSaving ? (
                                 <ActivityIndicator color={DailyLogColors.white} size="small" />

@@ -3,7 +3,7 @@ import { Alert } from 'react-native';
 import { router } from 'expo-router';
 
 export const handleCalculateEstimate = async (
-    foodName, quantity, unit, scannedData,
+    foodName, quantity, unit, scannedData, calories, protein, carbs,
     setIsEstimating, setCalories, setProtein, setCarbs, setShowEstimate
 ) => {
     setIsEstimating(true);
@@ -35,7 +35,10 @@ export const handleCalculateEstimate = async (
             body: JSON.stringify({
                 food_name: foodName,
                 consumed_amount: `${quantity} ${unit}`,
-                nutritional_facts: nutritionalFacts
+                nutritional_facts: nutritionalFacts,
+                ...(calories ? { calories } : {}),
+                ...(protein ? { protein } : {}),
+                ...(carbs ? { carbs } : {})
             })
         });
 

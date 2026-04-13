@@ -61,7 +61,7 @@ export default function LogNourishmentScreen() {
 
     const onCalculateEstimate = () => {
         handleCalculateEstimate(
-            foodName, quantity, unit, scannedData,
+            foodName, quantity, unit, scannedData, calories, protein, carbs,
             setIsEstimating, setCalories, setProtein, setCarbs, setShowEstimate
         );
     };
@@ -138,6 +138,11 @@ export default function LogNourishmentScreen() {
                 showEstimate={showEstimate}
                 handleCalculateEstimate={onCalculateEstimate}
                 handleSaveDailyLog={onSaveDailyLog}
+                foodName={foodName}
+                quantity={quantity}
+                calories={calories}
+                protein={protein}
+                carbs={carbs}
             />
         </SafeAreaView>
     );
